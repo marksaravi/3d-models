@@ -54,9 +54,6 @@ func main() {
 		prevx = x
 		prevy = y
 		counter++
-		if counter == 40 {
-			break
-		}
 	}
 	fout, _ := os.Create("./data.dxf")
 	fout.WriteString(builder.String())
