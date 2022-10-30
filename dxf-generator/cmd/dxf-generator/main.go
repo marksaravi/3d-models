@@ -22,7 +22,7 @@ const svg = `
 </svg>
 `
 
-func genShape(R, r, d float64, fn func(angle, R, r, d float64) (x, y float64)) {
+func genShape(R, r, d float64, fn func(angle, R, r, d float64) (x, y float64)) string {
 	var minx, miny float64 = 1000000, 1000000
 	var maxx, maxy float64 = -1000000, -1000000
 	polylines := strings.Builder{}
@@ -58,13 +58,14 @@ func genShape(R, r, d float64, fn func(angle, R, r, d float64) (x, y float64)) {
 	}
 
 	fmt.Println(minx, miny, maxx, maxy)
-	fout, _ := os.Create("./housing.svg")
 	marginx := (maxx - minx) / 10
 	marginy := (maxy - miny) / 10
-	fout.WriteString(fmt.Sprintf(svg, minx-marginx, miny-marginx, maxx-minx+marginx, maxy-miny+marginy, polylines.String()))
-	fout.Close()
+	return fmt.Sprintf(svg, minx-marginx, miny-marginx, maxx-minx+marginx, maxy-miny+marginy, polylines.String())
 }
 
 func main() {
-	genShape(2, 1, 0.5, epitrochoid.Epitrochoid)
+	svg := genShape(2, 1, 0.5, epitrochoid.Epitrochoid)
+	fout, _ := os.Create("./housing.svg")
+	fout.WriteString(svg)
+	fout.Close()
 }
