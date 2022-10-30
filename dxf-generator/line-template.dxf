@@ -1,0 +1,22 @@
+  0
+LINE
+  5
+COUNTER_DROM_32
+100
+AcDbEntity
+  8
+0
+100
+AcDbLine
+ 10
+X1
+ 20
+Y1
+ 30
+0.0
+ 11
+X2
+ 21
+Y2
+ 31
+0.0
