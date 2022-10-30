@@ -18,7 +18,13 @@ const svg = `
 </svg>
 `
 
-func genHousing(fixedRaduis, R, endAngle float64) string {
+func housing(angle, e, R float64) (x, y float64) {
+	x = e*math.Cos(angle) + R*math.Cos(angle/3)
+	y = e*math.Sin(angle) + R*math.Sin(angle/3)
+	return
+}
+
+func genHousing(fixedRaduis, R, endAngle float64, fn func(angle, e, R float64) (x, y float64)) string {
 	rotatingRadius := fixedRaduis / 2 * 3
 	var minx, miny float64 = 1000000, 1000000
 	var maxx, maxy float64 = -1000000, -1000000
@@ -32,8 +38,7 @@ func genHousing(fixedRaduis, R, endAngle float64) string {
 		builder.WriteString("<polyline  stroke-width=\"1\" fill=\"none\" stroke=\"black\" points=\"")
 		for j := 0; j < chunkSize; j++ {
 			angle += da
-			x := e*math.Cos(angle) + R*math.Cos(angle/3)
-			y := e*math.Sin(angle) + R*math.Sin(angle/3)
+			x, y := fn(angle, e, R)
 			x *= scale
 			y *= scale
 			builder.WriteString(fmt.Sprintf("%s%f,%f", comma, x, y))
@@ -69,6 +74,6 @@ func saveSvg(name, svg string) {
 }
 
 func main() {
-	saveSvg("housing", genHousing(24/10, 52/10, math.Pi*2))
+	saveSvg("housing", genHousing(24/10, 52/10, math.Pi*2, housing))
 	// saveSvg("rotor", 3, 2, 5, math.Pi*5, epitrochoid.Hypotrochoid)
 }
