@@ -19,14 +19,14 @@ const svg = `
 func main() {
 	fmt.Println("DXF Generator")
 	const scale float64 = 100
-	const endAngle float64 = math.Pi
+	const endAngle float64 = math.Pi * 2
 	const chunkSize = 180
 	const numChunks = 10
 
 	const da = endAngle / (chunkSize * numChunks)
 	const R = float64(3) * scale
 	const r = float64(1) * scale
-	const d = float64(2) * scale
+	const d = float64(0.5) * scale
 	var minx, miny float64 = 1000000, 1000000
 	var maxx, maxy float64 = -1000000, -1000000
 	polylines := strings.Builder{}
@@ -34,10 +34,11 @@ func main() {
 	for i := 0; i < numChunks; i++ {
 		builder := strings.Builder{}
 		comma := ""
+		var angle float64
 		builder.WriteString("<polyline  stroke-width=\"1\" fill=\"none\" stroke=\"black\" points=\"")
 		for j := 0; j < chunkSize; j++ {
-			angle := float64(i*chunkSize+j) * da
-			x, y := epitrochoid.Hypocycloid(angle, R, r, d)
+			angle = float64(i*chunkSize+j) * da
+			x, y := epitrochoid.Epitrochoid(angle, R, r, d)
 			builder.WriteString(fmt.Sprintf("%s%f,%f", comma, x, y))
 			comma = ","
 			if x > maxx {
@@ -55,10 +56,13 @@ func main() {
 		}
 		builder.WriteString("\" />")
 		polylines.WriteString(builder.String())
+		fmt.Println(angle / math.Pi * 180)
 	}
 
 	fmt.Println(minx, miny, maxx, maxy)
 	fout, _ := os.Create("./rotor.svg")
-	fout.WriteString(fmt.Sprintf(svg, minx-50, miny-50, maxx+50, maxy+50, polylines.String()))
+	marginx := (maxx - minx) / 10
+	marginy := (maxy - miny) / 10
+	fout.WriteString(fmt.Sprintf(svg, minx-marginx, miny-marginx, maxx+marginy, maxy+marginy, polylines.String()))
 	fout.Close()
 }
