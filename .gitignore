@@ -1,3 +1,5 @@
 *~.skp
 *.crdownload
 *.jpeg
+.DS_Store
+dxf-generator/data
