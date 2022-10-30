@@ -9,6 +9,12 @@ import (
 	"github.com/marksaravi/dxfgenerator/epitrochoid"
 )
 
+const scale float64 = 100
+const endAngle float64 = math.Pi * 2
+const chunkSize = 180
+const numChunks = 10
+const da = endAngle / (chunkSize * numChunks)
+
 const svg = `
 <svg viewBox="%f %f %f %f" xmlns="http://www.w3.org/2000/svg">
  <style>svg { background-color: white; }</style>
@@ -16,17 +22,7 @@ const svg = `
 </svg>
 `
 
-func main() {
-	fmt.Println("DXF Generator")
-	const scale float64 = 100
-	const endAngle float64 = math.Pi * 2
-	const chunkSize = 180
-	const numChunks = 10
-
-	const da = endAngle / (chunkSize * numChunks)
-	const R = float64(3) * scale
-	const r = float64(1) * scale
-	const d = float64(0.5) * scale
+func genShape(R, r, d float64, fn func(angle, R, r, d float64) (x, y float64)) {
 	var minx, miny float64 = 1000000, 1000000
 	var maxx, maxy float64 = -1000000, -1000000
 	polylines := strings.Builder{}
@@ -38,7 +34,9 @@ func main() {
 		builder.WriteString("<polyline  stroke-width=\"1\" fill=\"none\" stroke=\"black\" points=\"")
 		for j := 0; j < chunkSize; j++ {
 			angle = float64(i*chunkSize+j) * da
-			x, y := epitrochoid.Epitrochoid(angle, R, r, d)
+			x, y := fn(angle, R, r, d)
+			x *= scale
+			y *= scale
 			builder.WriteString(fmt.Sprintf("%s%f,%f", comma, x, y))
 			comma = ","
 			if x > maxx {
@@ -60,9 +58,13 @@ func main() {
 	}
 
 	fmt.Println(minx, miny, maxx, maxy)
-	fout, _ := os.Create("./rotor.svg")
+	fout, _ := os.Create("./housing.svg")
 	marginx := (maxx - minx) / 10
 	marginy := (maxy - miny) / 10
-	fout.WriteString(fmt.Sprintf(svg, minx-marginx, miny-marginx, maxx+marginy, maxy+marginy, polylines.String()))
+	fout.WriteString(fmt.Sprintf(svg, minx-marginx, miny-marginx, maxx-minx+marginx, maxy-miny+marginy, polylines.String()))
 	fout.Close()
+}
+
+func main() {
+	genShape(2, 1, 0.5, epitrochoid.Epitrochoid)
 }
